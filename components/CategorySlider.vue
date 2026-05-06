@@ -20,7 +20,7 @@ const emit = defineEmits<{
 
 const [emblaRef, emblaApi] = useEmblaCarousel(
   {
-    loop: true,
+    // loop: true,
     align: 'start',
     dragFree: true,
   },
@@ -168,17 +168,13 @@ function formatLabel(slug: string) {
 </script>
 
 <template>
-  <section
-    class="category-strip"
-    aria-label="Категории товаров"
+  <div
+    class="embla mt-2 max-w-full w-full"
+    aria-label="Рекомендуемые товары"
   >
-    <div class="embla">
-      <div
-        ref="emblaRef"
-        class="embla__viewport"
-      >
-        <div class="embla__container">
-          <div
+    <div class="embla__viewport" ref="emblaRef">
+      <div class="embla__container">
+        <div
             v-for="(cat, index) in categories"
             :key="cat"
             class="embla__slide"
@@ -193,33 +189,34 @@ function formatLabel(slug: string) {
               {{ formatLabel(cat) }}
             </button>
           </div>
-        </div>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <style scoped lang="scss">
 @use '~/assets/scss/glass' as glass;
 
-/* Обязательная обвязка Embla (v8 required-setup) */
+.embla {
+  --slide-spacing: 1rem;
+  user-select: none;
+}
+
 .embla__viewport {
+  padding: 10px 0;
   overflow: hidden;
 }
 
 .embla__container {
   display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-  /* Иначе flex-контейнер может сжаться до ширины вьюпорта и не дать переполнения — drag отключается */
-  width: max-content;
   touch-action: pan-y pinch-zoom;
+  margin-left: calc(var(--slide-spacing) * -1);
 }
 
-/* Слайды переменной ширины под контент чипа */
 .embla__slide {
-  flex: 0 0 auto;
-  min-width: max-content;
+  transform: translate3d(0, 0, 0);
+  width: fit-content;
+  padding-left: var(--slide-spacing);
 }
 
 .embla__chip {
