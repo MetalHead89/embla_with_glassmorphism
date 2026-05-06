@@ -6,7 +6,7 @@
  * Переменная ширина слайдов: https://www.embla-carousel.com/docs/guides/slide-sizes (v9, те же принципы)
  */
 import useEmblaCarousel from 'embla-carousel-vue'
-import Autoplay from 'embla-carousel-autoplay'
+// import Autoplay from 'embla-carousel-autoplay'
 import { nextTick, onBeforeUnmount, watch } from 'vue'
 
 const props = defineProps<{
@@ -22,15 +22,42 @@ const [emblaRef, emblaApi] = useEmblaCarousel(
   {
     loop: true,
     align: 'start',
+    dragFree: true,
   },
   [
-    Autoplay({
-      delay: 4000,
-      stopOnMouseEnter: true,
-      stopOnInteraction: false,
-    }),
+    // Autoplay({
+    //   delay: 4000,
+    //   stopOnMouseEnter: true,
+    //   stopOnInteraction: false,
+    // }),
   ],
 )
+
+let isProgrammaticScroll = false
+
+function getNearestCategoryIndex() {
+  const api = emblaApi.value
+  if (!api || props.categories.length === 0) return -1
+
+  const currentProgress = ((api.scrollProgress() % 1) + 1) % 1
+  const snaps = api.scrollSnapList()
+
+  let nearestIndex = -1
+  let nearestDistance = Number.POSITIVE_INFINITY
+
+  snaps.forEach((snap, index) => {
+    const delta = Math.abs(currentProgress - snap)
+    const wrappedDelta = Math.abs(1 - delta)
+    const distance = Math.min(delta, wrappedDelta)
+
+    if (distance < nearestDistance) {
+      nearestDistance = distance
+      nearestIndex = index
+    }
+  })
+
+  return nearestIndex
+}
 
 function syncFromModel() {
   const api = emblaApi.value
@@ -38,11 +65,16 @@ function syncFromModel() {
   const i = props.categories.indexOf(props.modelValue)
   if (i < 0) return
   if (api.selectedScrollSnap() !== i) {
+    isProgrammaticScroll = true
     api.scrollTo(i)
   }
 }
 
 function onSelect() {
+  if (isProgrammaticScroll) {
+    isProgrammaticScroll = false
+    return
+  }
   const api = emblaApi.value
   if (!api) return
   const cat = props.categories[api.selectedScrollSnap()]
@@ -51,28 +83,54 @@ function onSelect() {
   }
 }
 
-let removeSelectListener: (() => void) | undefined
+function onSettle() {
+  if (isProgrammaticScroll) {
+    isProgrammaticScroll = false
+    return
+  }
+
+  const api = emblaApi.value
+  if (!api || props.categories.length === 0) return
+
+  // After a free drag, Embla may not change the selected snap on its own.
+  // We pick the nearest category here so the slider keeps the user's position.
+  const nearestIndex = getNearestCategoryIndex()
+  if (nearestIndex < 0) return
+
+  const cat = props.categories[nearestIndex]
+  if (!cat) return
+
+  if (cat !== props.modelValue || api.selectedScrollSnap() !== nearestIndex) {
+    isProgrammaticScroll = true
+    emit('update:modelValue', cat)
+    api.scrollTo(nearestIndex)
+  }
+}
+
+let removeEmblaListener: (() => void) | undefined
 
 watch(
   emblaApi,
   (api) => {
-    removeSelectListener?.()
-    removeSelectListener = undefined
+    removeEmblaListener?.()
+    removeEmblaListener = undefined
     if (!api) return
     api.on('select', onSelect)
-    removeSelectListener = () => {
+    api.on('settle', onSettle)
+    removeEmblaListener = () => {
       api.off('select', onSelect)
+      api.off('settle', onSettle)
     }
-    void nextTick(() => {
-      api.plugins()?.autoplay?.play()
-      syncFromModel()
-    })
+    // void nextTick(() => {
+    //   api.plugins()?.autoplay?.play()
+    //   syncFromModel()
+    // })
   },
   { immediate: true },
 )
 
 onBeforeUnmount(() => {
-  removeSelectListener?.()
+  removeEmblaListener?.()
 })
 
 watch(
@@ -95,6 +153,7 @@ watch(
 function selectCategory(index: number) {
   const cat = props.categories[index]
   if (!cat) return
+  isProgrammaticScroll = true
   emit('update:modelValue', cat)
   emblaApi.value?.scrollTo(index)
 }

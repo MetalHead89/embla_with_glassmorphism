@@ -80,6 +80,34 @@ watch(
   },
   { immediate: true },
 )
+
+/** --- Модальное окно --- */
+const selectedProduct = ref<Product | null>(null)
+const isModalOpen = ref(false)
+
+function openProduct(product: Product) {
+  selectedProduct.value = product
+  isModalOpen.value = true
+}
+
+function closeModal() {
+  isModalOpen.value = false
+  selectedProduct.value = null
+}
+
+/** Рекомендации: те же категории, исключая выбранный товар, до 8 шт */
+const modalRecommendations = computed<Product[]>(() => {
+  const product = selectedProduct.value
+  if (!product || !products.value) return []
+  return products.value
+    .filter(p => p.id !== product.id)
+    .slice(0, 8)
+})
+
+/** При клике на товар в слайдере рекомендаций — обновляем выбранный продукт */
+function handleRecClick(product: Product) {
+  selectedProduct.value = product
+}
 </script>
 
 <template>
@@ -119,8 +147,21 @@ watch(
         </p>
       </header>
 
-      <ProductGrid :products="products" />
+      <ProductGrid
+        :products="products"
+        @product-click="openProduct"
+      />
     </main>
+
+    <ClientOnly>
+      <ProductModal
+        v-if="selectedProduct"
+        v-model="isModalOpen"
+        :product="selectedProduct"
+        :recommendations="modalRecommendations"
+        @product-click="handleRecClick"
+      />
+    </ClientOnly>
 
     <Footer />
   </div>

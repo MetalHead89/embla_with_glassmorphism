@@ -75,3 +75,6 @@ body {
   will-change: opacity, transform;
   animation: hero-fade-in 0.4s ease-out forwards;
 }
+
+/* Vue Final Modal styles */
+@import 'vue-final-modal/style.css';

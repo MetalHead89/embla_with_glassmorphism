@@ -6,6 +6,10 @@ const props = defineProps<{
   product: Product
 }>()
 
+const emit = defineEmits<{
+  click: [product: Product]
+}>()
+
 const imageSrc = ref(props.product.images[0] ?? '')
 const imageFailed = ref(!props.product.images[0])
 
@@ -31,7 +35,14 @@ function formatPrice(n: number) {
 </script>
 
 <template>
-  <article :class="$style.card">
+  <article
+    :class="$style.card"
+    tabindex="0"
+    role="button"
+    :aria-label="`Товар ${product.title}`"
+    @click="() => emit('click', product)"
+    @keydown.enter="() => emit('click', product)"
+  >
     <div :class="$style.media">
       <img
         v-if="!imageFailed && imageSrc"
@@ -95,9 +106,14 @@ function formatPrice(n: number) {
   overflow: hidden;
   border-radius: 1rem;
   transition: transform 0.2s ease;
+  cursor: pointer;
 
-  &:focus-within {
-    outline: 2px solid rgba(255, 255, 255, 0.35);
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.4);
     outline-offset: 2px;
   }
 }

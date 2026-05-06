@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import type { Product } from '~/types'
 
-defineProps<{
+const props = defineProps<{
   products: Product[]
+}>()
+
+const emit = defineEmits<{
+  'product-click': [product: Product]
 }>()
 </script>
 
 <template>
   <ul
-    :key="products.length" 
-    class="grid grid-cols-1 grid-rows-1 gap-6 auto-rows-fr sm:grid-cols-2 lg:grid-cols-4"
+    :key="products.length"
+    class="grid min-h-screen grid-cols-1 grid-rows-1 gap-6 auto-rows-fr sm:grid-cols-2 lg:grid-cols-4"
     aria-label="Товары"
   >
     <li
@@ -18,7 +22,10 @@ defineProps<{
       class="product-card-wrapper min-w-0"
       :style="{ animationDelay: `${idx * 50}ms` }"
     >
-      <ProductCard :product="p" />
+      <ProductCard
+        :product="p"
+        @click="emit('product-click', p)"
+      />
     </li>
   </ul>
 </template>
