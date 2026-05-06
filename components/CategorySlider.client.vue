@@ -100,6 +100,7 @@ function selectCategory(index: number) {
 }
 
 function formatLabel(slug: string) {
+  if (typeof slug !== 'string') return String(slug)
   return slug
     .split('-')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))

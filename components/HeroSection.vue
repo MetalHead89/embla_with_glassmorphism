@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-/** Дефолт — первое изображение товара (DummyJSON), позже подставится из категории */
 const DEFAULT_IMAGE_URL =
   'https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/1.webp'
 
 const props = withDefaults(
   defineProps<{
-    /** URL фона (cover); при ошибке — заглушка */
     imageUrl?: string
-    /** alt для фонового изображения */
     imageAlt?: string
   }>(),
   {
@@ -26,10 +23,14 @@ function onImgError() {
   loadError.value = true
 }
 
+/** Ключ для принудительной перерисовки img (key=imageUrl) + transition */
+const imgKey = ref(0)
+
 watch(
   () => props.imageUrl,
   () => {
     loadError.value = false
+    imgKey.value++
   },
 )
 </script>
@@ -42,9 +43,10 @@ watch(
     <!-- Фон: изображение или заглушка -->
     <img
       v-if="!loadError"
+      :key="imageUrl"
       :src="imageUrl"
       :alt="resolvedAlt"
-      class="absolute inset-0 h-full w-full object-cover"
+      class="hero-image absolute inset-0 h-full w-full object-cover"
       loading="eager"
       fetchpriority="high"
       decoding="async"

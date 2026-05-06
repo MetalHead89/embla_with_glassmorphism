@@ -8,3 +8,10 @@ export interface Product {
   brand?: string
   category?: string
 }
+
+/** Элемент списка категорий от DummyJSON */
+export interface CategoryItem {
+  slug: string
+  name: string
+  url: string
+}
