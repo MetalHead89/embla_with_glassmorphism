@@ -1,0 +1,13 @@
+// Миксины glassmorphism для SCSS-модулей в компонентах (@use)
+
+@mixin glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+@mixin glass-chip-active {
+  background: var(--glass-chip-active-bg);
+  color: #0b0c10;
+}

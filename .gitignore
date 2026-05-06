@@ -1,0 +1,19 @@
+# Nuxt
+.nuxt
+.output
+.data
+dist
+.cache
+
+# Node
+node_modules
+*.log
+
+# Env
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea
+.DS_Store

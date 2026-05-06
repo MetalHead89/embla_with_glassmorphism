@@ -1,0 +1,40 @@
+---
+alwaysApply: true
+---
+
+# Правила разработки
+
+## Архитектурные принципы (KISS)
+- **Минимализм**: только Embla, Tailwind, Nuxt — без лишних зависимостей
+- **Компонентность**: единый стиль (HeroSection, CategorySlider, ProductGrid, ProductCard, Footer)
+- **State**: локальный (useState/ref), без Pinia/Redux
+- **Запросы**: `useFetch` в `index.vue`, кэш в памяти на сессию
+
+## Структура и типизация
+- **Язык**: TypeScript строго (согласно vision.md)
+- **Типы**: `types/index.ts` — интерфейсы данных
+- **API**: DummyJSON endpoints — категории и товары (лимит 50)
+
+## Стили и тема
+- **Тема**: Dark mode (тёмный фон)
+- **Glassmorphism**: `rgba(255,255,255,0.1)` + `backdrop-filter: blur(10px)`
+- **Tailwind**: утилитарные классы для сетки/отступов/типографики
+- **SCSS модули**: кастомные стили glassmorphism
+- **Адаптивность**: 1/2/4 колонки (моб/планшет/десктоп)
+
+## Анимации и переходы
+- **Переходы**: херо — cross-fade 0.4s, сетка — stagger 50ms, чипс — scale(1.05)
+- **Слайдер**: Embla с transform translate3d (hardware acceleration)
+- **CSS transforms**: 60fps, will-change для анимируемых элементов
+
+## Оптимизация
+- **Изображения**: lazy loading, WebP/JPEG, fallback при ошибке
+- **Tree-shaking**: Vite + Nuxt auto-imports
+- **Web Vitals**: LCP < 2.5s, CLS < 0.1, INP < 200ms
+
+## Запрещено
+- Pinia, Redux, лишние библиотеки
+- Пагинация, «Load more»
+- Сложное state management
+
+> См. `vision.md` — разделы 1-6 для деталей реализации.
